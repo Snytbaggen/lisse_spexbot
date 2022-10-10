@@ -1,6 +1,9 @@
 # Environment properties
 .env
 
+#Other local files
+autoJoinUsers.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
