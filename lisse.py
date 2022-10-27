@@ -29,6 +29,11 @@ async def _helloThere(ctx):
     print("Received command: HelloThere")
     await ctx.send('General Kenobi!')
 
+@bot.command(name='WTF')
+async def _wtf(ctx):
+    print("Received command: WTF")
+    await ctx.send('Var är Boten?')
+
 @bot.command(name='VilkenJävlaBot')
 async def _vilkenBot(ctx):
     print("Received command: VilkenJävlaBot")
