@@ -17,7 +17,7 @@ def get_quote():
         "Vänner *tar hand om* varann.",
         "En tumme är tre korn, tre tummar ryms i en handflata och tre handflator är en räckvidd lång. Tar du tjugotvå räckvidder så får du en stång. Sätter du ihop tre stänger med 25 länkar så får du en kedja. Delar du kedjan i tiondelar så ryms dom i en famn, och hundra famnar, det är en kabel. Häpp!",
         "Han är en oskyldig säl som inte förtjänar att bli klubbad.",
-        "Bra tänkt! Jag tackor och bockar."
+        "Bra tänkt! Jag tackor och bockar.",
         "Spöken av järn? Hur läskigt är de? Menar du typ Fe?",
         "Mannen, myten, matberedaren – Mazarin maximerar!"
     ]
