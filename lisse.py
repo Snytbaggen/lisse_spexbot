@@ -56,6 +56,7 @@ async def _quotes(ctx):
 
 @bot.command(name='autoJoinThreads')
 async def _threadJoin(ctx):
+    global autoJoinThreadDict
     print('Received command: autoJoinThreads')
     key = ctx.channel.id
     if key not in autoJoinThreadDict:
@@ -74,8 +75,10 @@ async def on_ready():
 
 @bot.event
 async def on_thread_create(thread):
+    global autoJoinThreadDict
     print(f'Thread created in channel {thread.parent.id}')
     users = autoJoinThreadDict.get(f'{thread.parent_id}', [])
+    print(f'Adding following users to channel: {users}')
     for i in range(len(users)):
         print(f'Adding user: {users[i]}')
         await thread.add_user(discord.Object(id=users[i]))
