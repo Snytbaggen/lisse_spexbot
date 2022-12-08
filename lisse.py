@@ -5,6 +5,7 @@ import json
 from dotenv import load_dotenv
 from discord.ext import commands
 from botutils import *
+from pprint import pprint
 
 load_dotenv()
 token = os.getenv('TOKEN')
@@ -14,13 +15,17 @@ intents.message_content = True
 
 autoJoinThreadDict = {}
 try:
-    f = open("autoJoinUsers.json", "r")
-    autoJoinThreadDict = json.load(f)
-    f.close()
+    with open("autoJoinUsers.json", "r") as f:
+        rawUserDict = json.load(f)
+        for user in rawUserDict:
+            autoJoinThreadDict[int(user)] = rawUserDict[user]
+    print("Users read successfully")
 except FileNotFoundError:
     print('JSON file does not exist')
 except json.decoder.JSONDecodeError:
     print('JSON file is not valid')
+
+pprint(autoJoinThreadDict)
 
 bot = commands.Bot(command_prefix='-', intents=intents)
 
@@ -61,11 +66,16 @@ async def _threadJoin(ctx):
     key = ctx.channel.id
     if key not in autoJoinThreadDict:
         autoJoinThreadDict[key] = []
-    autoJoinThreadDict[key].append(ctx.author.id)
+    channel = autoJoinThreadDict[key]
+    userId = ctx.author.id
+    if userId not in channel:
+    	autoJoinThreadDict[key].append(ctx.author.id)
 
-    f = open("autoJoinUsers.json", "w")
-    f.write(json.dumps(autoJoinThreadDict))
-    f.close()
+    with open("autoJoinUsers.json", "w") as f:
+        # f.write(json.dumps(autoJoinThreadDict))
+        f.write("asdf")
+
+    pprint(autoJoinThreadDict)
 
     await ctx.send("Du kommer nu bli automatiskt tillagd i trådar som skapas i den här kanalen")
 
@@ -79,9 +89,8 @@ async def on_thread_create(thread):
     print(f'Thread created in channel {thread.parent.id}')
     users = autoJoinThreadDict.get(f'{thread.parent_id}', [])
     print(f'Adding following users to channel: {users}')
-    for i in range(len(users)):
-        print(f'Adding user: {users[i]}')
-        await thread.add_user(discord.Object(id=users[i]))
-
+    for user in users:
+        print('Adding user:', user)
+        await thread.add_user(discord.Object(id=user))
 
 bot.run(token)
