@@ -1,6 +1,7 @@
 import os
 import discord
 import json
+import asyncio
 
 from dotenv import load_dotenv
 from discord.ext import commands
@@ -13,19 +14,24 @@ token = os.getenv('TOKEN')
 intents = discord.Intents.default()
 intents.message_content = True
 
-autoJoinThreadDict = {}
-try:
-    with open("autoJoinUsers.json", "r") as f:
-        rawUserDict = json.load(f)
-        for user in rawUserDict:
-            autoJoinThreadDict[int(user)] = rawUserDict[user]
-    print("Users read successfully")
-except FileNotFoundError:
-    print('JSON file does not exist')
-except json.decoder.JSONDecodeError:
-    print('JSON file is not valid')
+def getDict():
+    autoJoinThreadDict = {}
+    try:
+        with open("autoJoinUsers.json", "r") as f:
+            rawUserDict = json.load(f)
+            for user in rawUserDict:
+                autoJoinThreadDict[int(user)] = rawUserDict[user]
+    except FileNotFoundError:
+        print("JSON file does not exist yet")
+    except json.decoder.JSONDecodeError:
+        print("JSON file is not valid")
+    return autoJoinThreadDict
 
-pprint(autoJoinThreadDict)
+def saveDict(dict):
+    with open("autoJoinUsers.json", "w") as f:
+        f.write(json.dumps(dict))
+
+pprint(getDict())
 
 bot = commands.Bot(command_prefix='-', intents=intents)
 
@@ -61,7 +67,7 @@ async def _quotes(ctx):
 
 @bot.command(name='autoJoinThreads')
 async def _threadJoin(ctx):
-    global autoJoinThreadDict
+    autoJoinThreadDict = getDict()
     print('Received command: autoJoinThreads')
     key = ctx.channel.id
     if key not in autoJoinThreadDict:
@@ -71,9 +77,7 @@ async def _threadJoin(ctx):
     if userId not in channel:
     	autoJoinThreadDict[key].append(ctx.author.id)
 
-    with open("autoJoinUsers.json", "w") as f:
-        # f.write(json.dumps(autoJoinThreadDict))
-        f.write("asdf")
+    saveDict(autoJoinThreadDict)
 
     pprint(autoJoinThreadDict)
 
@@ -85,12 +89,15 @@ async def on_ready():
 
 @bot.event
 async def on_thread_create(thread):
-    global autoJoinThreadDict
-    print(f'Thread created in channel {thread.parent.id}')
-    users = autoJoinThreadDict.get(f'{thread.parent_id}', [])
+    autoJoinThreadDict = getDict()
+    threadId = thread.parent.id
+    print(f'Thread created in channel {threadId}')
+    users = autoJoinThreadDict.get(threadId, [])
     print(f'Adding following users to channel: {users}')
-    for user in users:
-        print('Adding user:', user)
-        await thread.add_user(discord.Object(id=user))
+    async with asyncio.TaskGroup() as tg:
+        for user in users:
+            print('Adding user:', user)
+            tg.create_task(thread.add_user(discord.Object(id=user)))
+    print("Added users")
 
 bot.run(token)
